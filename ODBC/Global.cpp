@@ -24,9 +24,15 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+// ideepcoder: feature patch, DB_NAME in Registry subkey
+// not modifying CGlobal, hence using extern global
+extern CString  g_oDbName;
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
+
+const CString oRegPrefix = _T("ODBC_");		// a prefix following naming convention
 
 CGlobal g_oData;
 
@@ -69,46 +75,52 @@ CGlobal::~CGlobal()
 
 void CGlobal::Load()
 {
-	m_oClose =	 AfxGetApp()->GetProfileString( "ODBC", "FieldClose", m_oClose );
-	m_oOpen  =	 AfxGetApp()->GetProfileString( "ODBC", "FieldOpen", m_oOpen );
-	m_oHigh  =   AfxGetApp()->GetProfileString( "ODBC", "FieldHigh", m_oHigh );
-	m_oLow   =   AfxGetApp()->GetProfileString( "ODBC", "FieldLow", m_oLow );
-	m_oVolume =  AfxGetApp()->GetProfileString( "ODBC", "FieldVolume", m_oVolume );
-	m_oOpenInt = AfxGetApp()->GetProfileString( "ODBC", "FieldOpenInt", m_oOpenInt );
-	m_oSymbol =  AfxGetApp()->GetProfileString( "ODBC", "FieldSymbol", m_oSymbol );
-	m_oDate  =   AfxGetApp()->GetProfileString( "ODBC", "FieldDate", m_oDate );
+	CString oAbDbName;
+	oAbDbName.Format( "%s%s", oRegPrefix.GetString(), g_oDbName.GetString() );
 
-	m_oDSN = AfxGetApp()->GetProfileString( "ODBC", "DataSource", m_oDSN );
-	m_oTableName = AfxGetApp()->GetProfileString( "ODBC", "TableName", m_oTableName );
-	m_bSQLCustomQuery = AfxGetApp()->GetProfileInt( "ODBC", "SQLCustomQuery", m_bSQLCustomQuery );
-	m_oSQLQuotations = AfxGetApp()->GetProfileString( "ODBC", "SQLQuotations", m_oSQLQuotations );
-	m_oSQLSymbolList = AfxGetApp()->GetProfileString( "ODBC", "SQLSymbolList", m_oSQLSymbolList );
+	m_oClose =	 AfxGetApp()->GetProfileString( oAbDbName, "FieldClose", m_oClose );
+	m_oOpen  =	 AfxGetApp()->GetProfileString( oAbDbName, "FieldOpen", m_oOpen );
+	m_oHigh  =   AfxGetApp()->GetProfileString( oAbDbName, "FieldHigh", m_oHigh );
+	m_oLow   =   AfxGetApp()->GetProfileString( oAbDbName, "FieldLow", m_oLow );
+	m_oVolume =  AfxGetApp()->GetProfileString( oAbDbName, "FieldVolume", m_oVolume );
+	m_oOpenInt = AfxGetApp()->GetProfileString( oAbDbName, "FieldOpenInt", m_oOpenInt );
+	m_oSymbol =  AfxGetApp()->GetProfileString( oAbDbName, "FieldSymbol", m_oSymbol );
+	m_oDate  =   AfxGetApp()->GetProfileString( oAbDbName, "FieldDate", m_oDate );
 
-	m_bAutoRefresh = AfxGetApp()->GetProfileInt("ODBC", "AutoRefresh", 0 );
-	m_iServerType = AfxGetApp()->GetProfileInt("ODBC", "ServerType", 0 );
+	m_oDSN = AfxGetApp()->GetProfileString( oAbDbName, "DataSource", m_oDSN );
+	m_oTableName = AfxGetApp()->GetProfileString( oAbDbName, "TableName", m_oTableName );
+	m_bSQLCustomQuery = AfxGetApp()->GetProfileInt( oAbDbName, "SQLCustomQuery", m_bSQLCustomQuery );
+	m_oSQLQuotations = AfxGetApp()->GetProfileString( oAbDbName, "SQLQuotations", m_oSQLQuotations );
+	m_oSQLSymbolList = AfxGetApp()->GetProfileString( oAbDbName, "SQLSymbolList", m_oSQLSymbolList );
+
+	m_bAutoRefresh = AfxGetApp()->GetProfileInt( oAbDbName, "AutoRefresh", 0 );
+	m_iServerType = AfxGetApp()->GetProfileInt( oAbDbName, "ServerType", 0 );
 
 	UpdateServerType();
 }
 
 void CGlobal::Save()
 {
-	AfxGetApp()->WriteProfileString( "ODBC", "FieldClose", m_oClose );     
-	AfxGetApp()->WriteProfileString( "ODBC", "FieldOpen", m_oOpen );       
-	AfxGetApp()->WriteProfileString( "ODBC", "FieldHigh", m_oHigh );       
-	AfxGetApp()->WriteProfileString( "ODBC", "FieldLow", m_oLow );         
-	AfxGetApp()->WriteProfileString( "ODBC", "FieldVolume", m_oVolume );   
-	AfxGetApp()->WriteProfileString( "ODBC", "FieldOpenInt", m_oOpenInt ); 
-	AfxGetApp()->WriteProfileString( "ODBC", "FieldSymbol", m_oSymbol );   
-	AfxGetApp()->WriteProfileString( "ODBC", "FieldDate", m_oDate );       
+	CString oAbDbName;
+	oAbDbName.Format( "%s%s", oRegPrefix.GetString(), g_oDbName.GetString() );
 
-	AfxGetApp()->WriteProfileString( "ODBC", "DataSource", m_oDSN );
-	AfxGetApp()->WriteProfileString( "ODBC", "TableName", m_oTableName );
-	AfxGetApp()->WriteProfileInt( "ODBC", "SQLCustomQuery", m_bSQLCustomQuery );
-	AfxGetApp()->WriteProfileString( "ODBC", "SQLQuotations", m_oSQLQuotations );
-	AfxGetApp()->WriteProfileString( "ODBC", "SQLSymbolList", m_oSQLSymbolList );
+	AfxGetApp()->WriteProfileString( oAbDbName, "FieldClose", m_oClose );
+	AfxGetApp()->WriteProfileString( oAbDbName, "FieldOpen", m_oOpen );
+	AfxGetApp()->WriteProfileString( oAbDbName, "FieldHigh", m_oHigh );
+	AfxGetApp()->WriteProfileString( oAbDbName, "FieldLow", m_oLow );
+	AfxGetApp()->WriteProfileString( oAbDbName, "FieldVolume", m_oVolume );
+	AfxGetApp()->WriteProfileString( oAbDbName, "FieldOpenInt", m_oOpenInt );
+	AfxGetApp()->WriteProfileString( oAbDbName, "FieldSymbol", m_oSymbol );
+	AfxGetApp()->WriteProfileString( oAbDbName, "FieldDate", m_oDate );
 
-	AfxGetApp()->WriteProfileInt("ODBC", "AutoRefresh", m_bAutoRefresh );
-	AfxGetApp()->WriteProfileInt("ODBC", "ServerType", m_iServerType );
+	AfxGetApp()->WriteProfileString( oAbDbName, "DataSource", m_oDSN );
+	AfxGetApp()->WriteProfileString( oAbDbName, "TableName", m_oTableName );
+	AfxGetApp()->WriteProfileInt( oAbDbName, "SQLCustomQuery", m_bSQLCustomQuery );
+	AfxGetApp()->WriteProfileString( oAbDbName, "SQLQuotations", m_oSQLQuotations );
+	AfxGetApp()->WriteProfileString( oAbDbName, "SQLSymbolList", m_oSQLSymbolList );
+
+	AfxGetApp()->WriteProfileInt( oAbDbName, "AutoRefresh", m_bAutoRefresh );
+	AfxGetApp()->WriteProfileInt( oAbDbName, "ServerType", m_iServerType );
 
 	UpdateServerType();
 }

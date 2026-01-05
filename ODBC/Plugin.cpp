@@ -68,6 +68,10 @@ static struct PluginInfo oPluginInfoAfl =
 // the site interface for callbacks
 struct SiteInterface gSite;
 
+/* ideepcoder Feature patch : 20260105, include DB_NAME in registry subkey under TJP */
+CString g_oDbName = "Data";					// DB Name for Registry key
+
+void ConfigSetDbName( LPCTSTR pszPath );	// ideepcoder: added fwd declaration
 
 ///////////////////////////////////////////////////////////
 // Basic plug-in interface functions exported by DLL
@@ -441,7 +445,8 @@ PLUGINAPI int Configure( LPCTSTR pszPath, struct InfoSite *pSite )
 	// if only the function calls MFC or uses DLL resources
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
 
-  
+	ConfigSetDbName( pszPath );						// ideepcoder feature patch
+
 	CConfigDlg oDlg;
 	oDlg.m_pSite = pSite;
 
@@ -468,3 +473,14 @@ PLUGINAPI int SetTimeBase( int nTimeBase )
 	return 1;//return ( nTimeBase < ( 24 * 60 * 60 ) )  ? 1 : 0;
 }
 
+/// <summary>
+/// ideepcoder feature patch
+/// Configure() calls this helper func to set DbName global
+/// </summary>
+/// <param name="pszPath"></param>
+void ConfigSetDbName( LPCTSTR pszPath ) {
+	CString p( pszPath );
+	int pos = p.ReverseFind( '\\' );					// Trust in AB path is good
+
+	g_oDbName.SetString( p.Right( p.GetLength() - pos - 1 ) ); // New var to store DbName to build  RegKey
+}
